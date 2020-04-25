@@ -25,3 +25,6 @@ pre:
 	mkdir -p $(ODIR)/Modules
 	mkdir -p $(ODIR)/Utils
 	mkdir -p $(ODIR)/Hud
+
+clean:
+	rm -rf $(OBJS) $(BINARY)
