@@ -15,6 +15,7 @@
 #include <link.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <sys/mman.h>
 #endif
 
 #define INRANGE(x, a, b) (x >= a && x <= b)
@@ -170,10 +171,41 @@ uintptr_t Memory::Scan(const char* moduleName, const char* pattern, int offset)
 }
 
 void Memory::PatchString(uintptr_t address, const char* chars, int size) {
+#ifdef _WIN32
     DWORD old;
     VirtualProtect((LPVOID)address, size, PAGE_EXECUTE_READWRITE, &old);
     memcpy((LPVOID)address, chars, size);
     VirtualProtect((LPVOID)address, size, old, nullptr);
+#else
+    int old = 0;
+
+    {
+        char* filename = nullptr;
+        asprintf(&filename, "/proc/%d/maps", getpid());
+        FILE* file = fopen(filename, "r");
+
+        uintptr_t from, to;
+        char flags[4];
+
+        while (fscanf(file, "%x-%x %4c", &from, &to, flags)) {
+            if (address >= from && address + size <= to) {
+                if (flags[0] == 'r') old |= PROT_READ;
+                if (flags[1] == 'w') old |= PROT_WRITE;
+                if (flags[2] == 'x') old |= PROT_EXEC;
+                break;
+            }
+
+            while (fgetc(file) != '\n') {}
+        }
+
+        fclose(file);
+        free(filename);
+    }
+
+    mprotect((void*)address, size, old | PROT_WRITE);
+    memcpy((void*)address, chars, size);
+    mprotect((void*)address, size, old);
+#endif
 }
 
 #ifdef _WIN32

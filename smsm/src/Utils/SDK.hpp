@@ -1,6 +1,10 @@
 #pragma once
 #include <cmath>
 #include <cstring>
+#include <cstdint>
+#include <algorithm>
+
+using std::swap;
 
 #ifdef _WIN32
 #define __funcc __thiscall
@@ -44,11 +48,11 @@ struct Vector {
     {
         return ((float*)this)[i];
     }
-    inline float operator*(Vector vec) 
+    inline float operator*(Vector vec)
     {
         return x*vec.x + y*vec.y + z*vec.z;
     }
-    inline Vector operator^(Vector vec) 
+    inline Vector operator^(Vector vec)
     {
         Vector res;
         res.x = y * vec.z - z * vec.y;
@@ -683,14 +687,14 @@ static const char* EVENTS[] = {
 #define ALL_VISIBLE_CONTENTS (LAST_VISIBLE_CONTENTS | (LAST_VISIBLE_CONTENTS-1))
 
 #define CONTENTS_TESTFOGVOLUME	0x100
-#define CONTENTS_UNUSED			0x200	
+#define CONTENTS_UNUSED			0x200
 
-// unused 
+// unused
 // NOTE: If it's visible, grab from the top + update LAST_VISIBLE_CONTENTS
 // if not visible, then grab from the bottom.
 #define CONTENTS_UNUSED6		0x400
 
-#define CONTENTS_TEAM1			0x800	// per team contents used to differentiate collisions 
+#define CONTENTS_TEAM1			0x800	// per team contents used to differentiate collisions
 #define CONTENTS_TEAM2			0x1000	// between players and objects on different teams
 
 // ignore CONTENTS_OPAQUE on surfaces that have SURF_NODRAW
@@ -740,7 +744,7 @@ static const char* EVENTS[] = {
 #define SURF_BUMPLIGHT	0x0800	// calculate three lightmaps for the surface for bumpmapping
 #define SURF_NOSHADOWS	0x1000	// Don't receive shadows
 #define SURF_NODECALS	0x2000	// Don't receive decals
-#define SURF_NOCHOP		0x4000	// Don't subdivide patches on this surface 
+#define SURF_NOCHOP		0x4000	// Don't subdivide patches on this surface
 #define SURF_HITBOX		0x8000	// surface is part of a hitbox
 
 
@@ -824,11 +828,21 @@ struct CGameTrace : public CBaseTrace {
     int hitbox;
 };
 
-struct __declspec(align(16)) VectorAligned : public Vector {
+#if defined(_MSC_VER)
+#define ALIGNED_(x) __declspec(align(x))
+#else
+#if defined(__GNUC__)
+#define ALIGNED_(x) __attribute__ ((aligned(x)))
+#endif
+#endif
+
+struct ALIGNED_(16) VectorAligned : public Vector {
     VectorAligned() : Vector(), w(0) {};
     VectorAligned(float x, float y, float z) : Vector(x, y, z) , w(0) {}
     float w;
 };
+
+#undef ALIGNED_
 
 struct matrix3x4_t {
     float m_flMatVal[3][4];
@@ -960,6 +974,8 @@ inline void Destruct(T* pMemory)
 {
     pMemory->~T();
 }
+
+#define __cdecl __attribute__((__cdecl__))
 
 template <class T, class I = int>
 class CUtlMemory {
@@ -2275,7 +2291,7 @@ DECLARE_NAMED_FIELDTYPE(char, "character");
 DECLARE_NAMED_FIELDTYPE(HSCRIPT, "hscript");
 DECLARE_NAMED_FIELDTYPE(ScriptVariant_t, "variant");
 
-inline const char* ScriptFieldTypeName(__int16 eType)
+inline const char* ScriptFieldTypeName(int16_t eType)
 {
     switch (eType) {
     case FIELD_VOID:
@@ -2442,7 +2458,7 @@ struct ScriptVariant_t {
             m_pszString = val;
         }
         else {
-            m_pszString = _strdup(val);
+            m_pszString = strdup(val);
             m_flags |= SV_FREE;
         }
     }
@@ -2662,7 +2678,7 @@ struct ScriptVariant_t {
             pDest->m_flags |= SV_FREE;
         }
         else if (m_type == FIELD_CSTRING) {
-            pDest->m_pszString = _strdup(m_pszString);
+            pDest->m_pszString = strdup(m_pszString);
             pDest->m_flags |= SV_FREE;
         }
         else {
@@ -2681,8 +2697,8 @@ struct ScriptVariant_t {
         HSCRIPT m_hScript;
     };
 
-    __int16 m_type;
-    __int16 m_flags;
+    int16_t m_type;
+    int16_t m_flags;
 
 private:
 };

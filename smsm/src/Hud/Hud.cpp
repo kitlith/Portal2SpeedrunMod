@@ -36,7 +36,11 @@ int StaminaHud::GetStaminaTexture() {
 void StaminaHud::Draw() {
     //get width and height for gui drawing
     int width, height;
+#ifdef _WIN32
     engine->GetScreenSize(width, height);
+#else
+    engine->GetScreenSize(nullptr, width, height);
+#endif
 
     //drawing covering color
     Color cColor = this->staminaColor;
@@ -72,7 +76,7 @@ static int TextureFromDumbData(int& id, int width, int height, const unsigned ch
                 dataRGBA[i * 4 + 2] = colorData[c + 2];
                 dataRGBA[i * 4 + 3] = colorData[c + 3];
             }
-            
+
         }
         surface->DrawSetTextureRGBA(surface->matsurface->ThisPtr(), id, dataRGBA, 10, 13);
     }
@@ -232,7 +236,11 @@ void CelesteBerryHud::Draw() {
     if (posOffset == 0.0)return;
 
     int width, height;
+#ifdef _WIN32
     engine->GetScreenSize(width, height);
+#else
+    engine->GetScreenSize(nullptr, width, height);
+#endif
 
     int drawX = width + (pow((1.0 - posOffset), 2) *300.0) - 20;
     int drawY = 30;
@@ -260,7 +268,7 @@ void CelesteBerryHud::Draw() {
     drawX -= xTextWidth;
     surface->DrawTxt(font, drawX + shadowOffset, drawY - 4 + shadowOffset, Color(0, 0, 0, 150), xText);
     surface->DrawTxt(font, drawX, drawY - 4, Color(255, 255, 255, 255), xText);
-    
+
     int textHeight = surface->GetFontHeight(font);
 
     if (int texture = this->GetBerryTexture(1)) {
