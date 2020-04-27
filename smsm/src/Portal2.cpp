@@ -119,8 +119,8 @@ void Portal2::LoadOffsets()
     hoststate = 9; // HostState_OnClientConnected
     AutoCompletionFunc = 37; // listdemo_CompletionFunc
     ClientCommand = 39; // CVEngineServer
-    // TraceRay = ; // IEngineTrace
-    // NextParticleSystem = ;
+    TraceRay = 5; // IEngineTrace
+    // NextParticleSystem = ; // IClientTools
     ProcessMovement = 2; // CGameMovement
     // m_fFlags = ; // CBaseEntity
     // m_nTickBase = ; // CBaseEntity
