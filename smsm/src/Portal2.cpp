@@ -127,8 +127,8 @@ void Portal2::LoadOffsets()
     // m_bDucking = ; // CBaseEntity
     // m_hUseEntity = ; // CBaseEntity
     GetScreenSize = 5; // CEngineClient
-    // PrecacheModel = ; // IEngineTool
-    // GetWorldToScreenMatrixForView = ; // IEngineTool
+    PrecacheModel = 63; // IEngineTool
+    GetWorldToScreenMatrixForView = 81; // IEngineTool (unused?)
 
     // client.so
 
